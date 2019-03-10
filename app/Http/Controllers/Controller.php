@@ -11,18 +11,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-    /**
-     * creating new model or updating if exists
-     *
-     * @param Request $request
-     * @param Class 
-     * @param int $id
-     * @return boolean
-     */
-    protected function updateOrCreate($request, $model, $id = 0)
-    {
-        return $model::updateOrCreate(['id' => $id], $request->all());
-    }
 
     /**
      * syncronized relation between books and authors
@@ -32,7 +20,7 @@ class Controller extends BaseController
      *
      * @return boolean
      */
-    protected function syncAuthors($book, $array = [])
+    public function syncAuthors(Book $book, $array = [])
     {
         return $array == [] ?  0 : $book->authors()->sync($array);
     }

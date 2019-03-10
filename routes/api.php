@@ -22,7 +22,7 @@ use Illuminate\Http\Request;
 
 Route::group(['prefix' => 'v1/books', 'middleware'=> 'auth:api'], function(){
     Route::get('/list', 'API\BookController@index');
-    Route::get('/by-id/{id}', 'API\BookController@show');
-    Route::post('/update/{id}', 'API\BookController@update');
-    Route::delete('/{id}', 'API\BookController@delete');
+    Route::get('/by-id/{book}', 'API\BookController@show');
+    Route::post('/update/{book}', 'API\BookController@update');
+    Route::delete('/{book}', 'API\BookController@delete');
 });

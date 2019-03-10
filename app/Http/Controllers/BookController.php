@@ -12,8 +12,17 @@ Use App\Http\Requests\BookRequest;
  */
 class BookController extends Controller
 {
+    /**
+     * @var string BOOK_CREATE 
+     */
     const BOOK_CREATE = 'Была создана книга: ';
+    /**
+     * @var string BOOK_UPDATE
+     */
     const BOOK_UPDATE = 'Была отредактирована книга: ';
+    /**
+     * @var string BOOK_DELETE
+     */
     const BOOK_DELETE = 'Была удалена книга: ';
     
     /**
@@ -41,23 +50,20 @@ class BookController extends Controller
     /**
      * Store a newly created book in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\BookRequest $request
      * @return \Illuminate\Http\Response
      */
     public function store(BookRequest $request)
     {
-
-        $book = $this->updateOrCreate($request, \App\Book::class);
-
+        $book = Book::create($request->all());
         $this->syncAuthors($book, $request->input('authors'));
-
         return redirect('books')->with('flash_msg', self::BOOK_CREATE.$book->title);
     }
     
     /**
      * Show the form for editing the specified book.
      *
-     * @param  int  $id
+     * @param  Book $book
      * @return \Illuminate\Http\Response
      */
     public function edit($book)
@@ -76,13 +82,10 @@ class BookController extends Controller
      */
     public function update(BookRequest $request, $book)
     {
-        $book = $this->updateOrCreate($request, \App\Book::class, $book->id);
-
+        $book->update($request->all());
         $this->syncAuthors($book, $request->input('authors'));
-
         return redirect('books')->with('flash_msg', self::BOOK_UPDATE.$book->title);
     }
-
 
     /**
      * Delete the specified book from storage
@@ -95,11 +98,8 @@ class BookController extends Controller
     public function destroy(Book $book)
     {
         $book->delete();
-
         return redirect('books')->with('flash_msg', self::BOOK_DELETE.$book->title);
     }
 
 
-
-    
 }

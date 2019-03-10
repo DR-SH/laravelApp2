@@ -5,11 +5,27 @@ use App\Book;
 use App\Author;
 use Illuminate\Http\Request;
 Use App\Http\Requests\AuthorRequest;
+
+/**
+ * Class AuthorController
+ * @package App\Http\Controllers
+ */
 class AuthorController extends Controller
 {
 
+    /**
+     * @var string AUTHOR_CREATE
+     */
     const AUTHOR_CREATE = 'Был создан автор: ';
+
+    /**
+     * @var string AUTHOR_UPDATE
+     */
     const AUTHOR_UPDATE = 'Был отредактирован автор: ';
+    
+    /**
+     * @var string AUTHOR_DELETE
+     */
     const AUTHOR_DELETE = 'Был удалён автор: ';
     
     /**
@@ -43,7 +59,7 @@ class AuthorController extends Controller
      */
     public function store(AuthorRequest $request)
     {
-        $author = $this->updateOrCreate($request, \App\Author::class);
+        $author = Author::create($request->all());
 
         if ($request->has('books') ){
             $this->syncBooks($author, $request->input('books'));
@@ -54,9 +70,9 @@ class AuthorController extends Controller
 
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified author.
      *
-     * @param  int  $id
+     * @param Author $author
      * @return \Illuminate\Http\Response
      */
     public function edit($author)
@@ -66,7 +82,7 @@ class AuthorController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified author in storage.
      *
      * @param AuthorRequest $request
      * @param Author $author
@@ -74,15 +90,15 @@ class AuthorController extends Controller
      */
     public function update(AuthorRequest $request, $author)
     {
-        $author = $this->updateOrCreate($request, \App\Author::class, $author->id);
 
+        $author->update($request->all());
         $request->has('books') ? $this->syncBooks($author, $request->input('books')) : $this->detachBooks($author);
 
         return redirect('authors')->with('flash_msg', self::AUTHOR_UPDATE.$author->name);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified author from storage.
      *
      * @param  collection
      * @return \Illuminate\Http\Response redirect
@@ -95,26 +111,24 @@ class AuthorController extends Controller
     }
 
     /**
-     * syncronized relation between books and authors
+     * Syncronize relation between books and authors.
      *
      * @param Author $author
-     *   
-     * @return boolean 
-     * @internal param Book $book
+     * @param array $array
+     * @return boolean
      */
-    private function syncBooks(Author $author, array $array = [])
+    public function syncBooks(Author $author, array $array = [])
     {
-        return $author->books()->sync($array);
+        return $array == [] ? 0 : $author->books()->sync($array);
     }
 
     /**
-     * syncronized relation between books and authors
+     * Detach relation between books and authors.
      *
      * @param Author $author
-     *
      * @return boolean
      */
-    private function detachBooks(Author $author)
+    public function detachBooks(Author $author)
     {
         return $author->books()->detach();
     }

@@ -36,30 +36,25 @@ class BookController extends Controller
     /**
      * Display the specified book.
      * 
-     * @param integer $id
+     * @param Book $book
      * @return \Illuminate\Http\JsonResponse
      */
     
-    public function show($id)
+    public function show($book)
     {
-        $book = new BookResource(Book::find($id));
-        if($book->resource){
-            return Response::json($book, 200);
-        }
-        return Response::json(['response' => 'Книги с таким id не найдено'], 400);
+        return Response::json($book, 200);
     }
     
     /**
      * Update the specified book in storage.
      *
      * @param Request $request
-     * @param integer $id
+     * @param Book $book
      * 
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $book)
     {
-
         $validator = Validator::make($request->all(), [
             'title'=>'regex:/^[a-zа-я\s]+$/iu|min:3',
             'about'=>'min:3',
@@ -70,19 +65,12 @@ class BookController extends Controller
         if ($validator->fails()) {
             return Response::json(['response' => 'Данные заполнены некорректно'], 400);
         }
+        
+        $book->update($request->all());
+        $this->syncAuthors($book, $request->input('authors'));
+        return Response::json(new BookResource($book), 200);
 
-        $book = new BookResource(Book::find($id));
-
-        if($book->resource){
-
-            $this->updateOrCreate($request, \App\Book::class, $id);
-            $this->syncAuthors($book->resource, $request->input('authors'));
-            return Response::json(new BookResource(Book::find($id)), 200);
-
-        }
-        return Response::json(['response' => 'Такой книги не найдено'], 400);
     }
-
 
     /**
      *  Delete the specified book from storage.
@@ -90,15 +78,10 @@ class BookController extends Controller
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function delete($id)
+    public function delete($book)
     {
-        $book = Book::where('id', $id);
-        
-        if($book->get()->isNotEmpty()){
-            $book->delete();
-            return Response::json(['response' => 'Книга удалена'], 200);
-        }
-        return Response::json(['response' => 'Такой книги не существует'], 400);
+        $book->delete();
+        return Response::json(['response' => 'Книга удалена'], 200);
     }
 
 }
